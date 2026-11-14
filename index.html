@@ -163,6 +163,8 @@
   .btn.primary{background:var(--ink);color:var(--paper)}
   .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
   .hint{font-family:Oswald;font-weight:400;font-size:14px;color:#6b5d47;margin-top:12px}
+  .sendstatus{font-family:"Permanent Marker";font-size:19px;margin:14px 0 4px;color:#1f6b2e}
+  .sendstatus.bad{color:var(--red)}
   pre.copytext{white-space:pre-wrap;font-family:"Special Elite";font-size:14px;background:#f4ecd9;border:1px solid #cdbd99;padding:10px;margin:12px 0 0;display:none}
 
   /* sparks */
@@ -263,7 +265,8 @@
       </div>
     </section>
 
-    <button class="submit" type="submit">🔥 SEND IT TO THE SHOP 🔥</button>
+    <input type="checkbox" name="botcheck" id="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+    <button class="submit" type="submit" id="submitBtn">🔥 SEND IT TO THE SHOP 🔥</button>
     <div class="err" id="err" role="alert"></div>
 
     <div class="fine">Brad's Welding &amp; Knife Shop is a test lab for C.A.S. Industries Inc. and is not responsible for bad welds, shoddy products, splinters, or handles that turn out better than expected. No refunds. Birthday wishes are free.</div>
@@ -278,7 +281,8 @@
       <div class="no" id="tNo"></div>
       <table id="tTable"></table>
       <div><b style="font-family:Oswald;letter-spacing:1px">EST. COMPLETION:</b> When Brad says so. Quality takes time, birthdays don't wait. He'll work fast.</div>
-      <div class="hint">Last step: get this ticket to Brad so he knows what to build.</div>
+      <div class="sendstatus" id="sendStatus"></div>
+      <div class="hint" id="backupHint">Want a copy for yourself, or to text Brad too?</div>
       <div class="actions">
         <button class="btn primary" type="button" id="copyBtn">📋 Copy my order</button>
         <a class="btn" id="smsBtn" href="#">💬 Text it to Brad</a>
@@ -294,6 +298,9 @@
 
 <script>
 (function(){
+  // ====== PASTE YOUR WEB3FORMS ACCESS KEY BETWEEN THE QUOTES ======
+  const WEB3FORMS_KEY = "6adeefe4-b699-4a90-844c-720e6a1705c4";
+  // =================================================================
   const WOODS = [
     {id:"koa", name:"“Big Island” Koa", origin:"Hawaii, USA",
      desc:"Golden-to-reddish brown with a curly figure that shimmers when you tilt it. Hawaiians built canoes and ukuleles out of this stuff.",
@@ -533,10 +540,34 @@
     $("#copyText").textContent = orderText;
     $("#copyMsg").textContent = "";
     $("#orderForm").style.display="none";
+    sendOrder(rows);
     const t=$("#ticket"); t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
     t.scrollIntoView({behavior:"smooth",block:"start"});
     const r=t.getBoundingClientRect(); setTimeout(()=>{ sparks(innerWidth-120, 140); sparks(innerWidth/2, 160); },350);
   });
+
+  async function sendOrder(rows){
+    const st$ = $("#sendStatus");
+    if (!WEB3FORMS_KEY || WEB3FORMS_KEY.indexOf("PASTE")===0){
+      st$.className="sendstatus bad"; st$.textContent="Shop inbox isn't hooked up yet. Use the buttons below to send it to Brad.";
+      return;
+    }
+    if ($("#botcheck").checked) return;
+    st$.className="sendstatus"; st$.textContent="📨 Sending to the shop…";
+    const payload = {access_key:WEB3FORMS_KEY, subject:`🔧 New handle order: ${rows[2][1]} (${orderNo})`,
+      from_name:"Brad's Welding & Knife Shop", order_no:orderNo};
+    rows.forEach(r=>payload[r[0]]=r[1]);
+    try{
+      const res = await fetch("https://api.web3forms.com/submit",{method:"POST",
+        headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(payload)});
+      const j = await res.json().catch(()=>({}));
+      if(res.ok && j.success!==false){ st$.textContent="✅ Sent! Brad's got your order. Sparks will fly soon."; }
+      else throw new Error(j.message||res.status);
+    }catch(err){
+      st$.className="sendstatus bad";
+      st$.textContent="Hmm, the order didn't go through. Tap \"Text it to Brad\" below instead.";
+    }
+  }
 
   $("#copyBtn").addEventListener("click", async ()=>{
     try{ await navigator.clipboard.writeText(orderText); $("#copyMsg").textContent="✅ Copied! Paste it in a text to Brad."; }

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brad's Welding &amp; Knife Shop — Handle Order Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;500;600;700&family=Special+Elite&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --char:#1d1c1b; --char2:#2a2826; --steel:#b9bcbf; --paper:#f3ead6; --paper2:#e9dcc0;
+    --ink:#1f1b16; --spark:#ff7a1a; --spark2:#ffc94a; --red:#b3261e; --blue:#3a5a8c; --brown:#4a2c19;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:Oswald, "Arial Narrow", sans-serif; color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -200px, rgba(255,122,26,.18), transparent 60%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0 2px, transparent 2px 14px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.25) 0 2px, transparent 2px 14px),
+      var(--char);
+    min-height:100vh; padding:28px 14px 60px;
+  }
+  .wrap{max-width:880px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  header{display:flex;align-items:center;gap:26px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+  .logo{position:relative;width:200px;height:200px;flex:none}
+  .logo img{width:100%;height:100%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.6))}
+  .logo .tag{
+    position:absolute;right:-26px;bottom:-4px;transform:rotate(-12deg);
+    background:var(--spark);color:#1a0f05;font-family:"Black Ops One";font-size:17px;letter-spacing:1px;
+    padding:5px 12px 4px;border:2px solid #1a0f05;box-shadow:3px 3px 0 #1a0f05;white-space:nowrap
+  }
+  .title{color:var(--paper);text-align:left;max-width:460px}
+  .title .kicker{font-family:"Special Elite";color:var(--spark2);letter-spacing:2px;font-size:14px}
+  .title h1{font-family:"Black Ops One";font-weight:400;font-size:clamp(30px,6vw,48px);line-height:1;margin:6px 0 8px;letter-spacing:1px}
+  .title h1 span{color:var(--spark)}
+  .title p{margin:0;color:#cfc6b6;font-weight:400;font-size:16px;line-height:1.4}
+
+  /* ---------- paper ---------- */
+  .paper{
+    position:relative;background:
+      linear-gradient(transparent 0 0),
+      repeating-linear-gradient(transparent 0 31px, rgba(58,90,140,.13) 31px 32px),
+      radial-gradient(circle at 85% 8%, rgba(120,80,30,.12), transparent 30%),
+      radial-gradient(circle at 10% 95%, rgba(120,80,30,.10), transparent 25%),
+      var(--paper);
+    border-radius:4px;padding:34px clamp(16px,4vw,42px) 30px;
+    box-shadow:0 2px 0 #cbb98f, 0 24px 50px rgba(0,0,0,.55);
+  }
+  .paper::before{ /* left margin line */
+    content:"";position:absolute;top:0;bottom:0;left:clamp(8px,2vw,22px);width:2px;background:rgba(179,38,30,.35)
+  }
+  .rivet{position:absolute;width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #eee, #8a8d90 55%, #4a4c4e);box-shadow:0 1px 2px rgba(0,0,0,.6)}
+  .r1{top:10px;left:10px}.r2{top:10px;right:10px}.r3{bottom:10px;left:10px}.r4{bottom:10px;right:10px}
+
+  .formhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;border-bottom:3px double var(--ink);padding-bottom:12px;margin-bottom:22px}
+  .formhead h2{font-family:"Black Ops One";font-weight:400;margin:0;font-size:clamp(22px,4vw,30px);letter-spacing:1px}
+  .formhead .meta{font-family:"Special Elite";font-size:14px;text-align:right;line-height:1.6}
+  .formhead .meta b{font-family:Oswald;font-weight:600;letter-spacing:1px;font-size:12px;color:#6b5d47}
+
+  section{margin:26px 0}
+  .step{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+  .step .num{flex:none;font-family:"Black Ops One";background:var(--ink);color:var(--paper);width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-size:17px}
+  .step h3{margin:0;font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+  .step small{display:block;font-family:"Special Elite";font-size:14px;color:#6b5d47;text-transform:none;letter-spacing:0;font-weight:400}
+
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+  label.f{display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#6b5d47}
+  input[type=text], textarea, select{
+    width:100%;font-family:"Special Elite";font-size:19px;color:#13294b;background:transparent;border:none;
+    border-bottom:2px solid var(--ink);padding:6px 2px;outline:none;border-radius:0
+  }
+  textarea{resize:vertical;min-height:70px;border:2px solid var(--ink);padding:8px;background:rgba(255,255,255,.25)}
+  input:focus, textarea:focus, select:focus{border-color:var(--spark);background:rgba(255,122,26,.07)}
+
+  /* ---------- knife preview ---------- */
+  .bench{
+    background:linear-gradient(#3b2a1d,#2b1e14);border-radius:6px;padding:14px 12px 10px;margin:4px 0 6px;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.6);position:relative;overflow:hidden
+  }
+  .bench::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 3px,transparent 3px 40px);pointer-events:none}
+  .bench svg{display:block;width:100%;height:auto;position:relative;z-index:1}
+  .bench .cap{position:relative;z-index:1;font-family:"Special Elite";color:var(--paper2);font-size:14px;text-align:center;margin-top:4px}
+  .bench .cap b{font-family:"Permanent Marker";font-weight:400;color:var(--spark2);font-size:17px}
+
+  /* ---------- wood cards ---------- */
+  .woods{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+  .wood{position:relative;display:block;cursor:pointer;background:#fffaf0;border:2px solid var(--ink);border-radius:6px;padding:10px 12px 12px;
+    box-shadow:4px 4px 0 var(--ink);transition:transform .15s, box-shadow .15s}
+  .wood:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+  .wood input{position:absolute;opacity:0;pointer-events:none}
+  .wood:has(input:focus-visible){outline:3px solid var(--spark);outline-offset:3px}
+  .wood.sel{border-color:var(--spark);box-shadow:6px 6px 0 var(--spark)}
+  .swatch{display:block;width:100%;height:auto;border-radius:3px}
+  .wood h4{margin:10px 0 2px;font-size:20px;font-weight:600;line-height:1.1}
+  .wood .origin{font-family:"Special Elite";font-size:13px;color:#6b5d47}
+  .wood p{margin:8px 0 8px;font-size:15px;line-height:1.35;font-weight:400}
+  .meter{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;color:#6b5d47;margin:3px 0}
+  .meter .bar{flex:1;display:flex;gap:3px}
+  .meter .bar i{flex:1;height:8px;background:#dccfb3;border-radius:1px}
+  .meter .bar i.on{background:var(--brown)}
+  .note{font-family:"Permanent Marker";color:var(--red);font-size:15px;margin-top:8px;transform:rotate(-1deg);line-height:1.25}
+  .stamp{
+    position:absolute;top:14px;right:10px;transform:rotate(9deg) scale(1.6);opacity:0;pointer-events:none;
+    font-family:"Black Ops One";color:var(--spark);border:3px solid var(--spark);padding:3px 8px;font-size:14px;letter-spacing:1px;
+    background:rgba(255,250,240,.85);transition:all .25s cubic-bezier(.3,1.6,.5,1)
+  }
+  .wood.sel .stamp{opacity:1;transform:rotate(9deg) scale(1)}
+  .shine{transition:transform 1.2s ease}
+  .wood:hover .shine{transform:translateX(120%)}
+
+  /* ---------- option chips ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{position:relative;cursor:pointer}
+  .chip input{position:absolute;opacity:0}
+  .chip span{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;font-size:16px;background:#fffaf0;font-weight:500;transition:background .15s}
+  .chip input:checked + span{background:var(--ink);color:var(--paper)}
+  .chip input:focus-visible + span{outline:3px solid var(--spark);outline-offset:2px}
+  .chip .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.4);flex:none}
+  .chip input:disabled + span{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+  .sub{font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#6b5d47;margin:16px 0 8px}
+
+  .check{display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-size:16px;line-height:1.35;margin:10px 0;font-weight:400}
+  .check input{width:22px;height:22px;accent-color:var(--ink);flex:none;margin-top:1px}
+
+  /* ---------- signature & submit ---------- */
+  .sig{display:grid;grid-template-columns:2fr 1fr;gap:14px 22px;align-items:end}
+  .sig input{font-family:"Permanent Marker";font-size:24px}
+  .submit{
+    display:block;width:100%;margin-top:26px;cursor:pointer;
+    font-family:"Black Ops One";font-size:clamp(20px,4vw,26px);letter-spacing:2px;color:#1a0f05;
+    background:linear-gradient(var(--spark2),var(--spark));border:3px solid #1a0f05;border-radius:6px;padding:16px;
+    box-shadow:5px 5px 0 #1a0f05;transition:transform .1s, box-shadow .1s
+  }
+  .submit:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 #1a0f05}
+  .submit:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #1a0f05}
+  .err{font-family:"Permanent Marker";color:var(--red);text-align:center;margin-top:12px;min-height:22px;font-size:17px}
+
+  .fine{font-size:12px;color:#7d6f58;text-align:center;margin-top:22px;font-weight:400;line-height:1.5}
+  footer{color:#8f877b;text-align:center;font-size:13px;margin-top:20px;font-family:"Special Elite"}
+
+  /* ---------- work order ticket ---------- */
+  #ticket{display:none}
+  #ticket.show{display:block;animation:drop .55s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes drop{from{transform:translateY(-30px) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
+  .ticket{background:#fffdf6;border:2px dashed var(--ink);padding:24px clamp(14px,4vw,30px);position:relative;font-family:"Special Elite";font-size:17px}
+  .ticket h3{font-family:"Black Ops One";font-weight:400;font-size:26px;margin:0 0 4px;letter-spacing:1px}
+  .ticket .no{color:#6b5d47;font-size:14px}
+  .ticket table{width:100%;border-collapse:collapse;margin:34px 0 16px}
+  .ticket td{padding:7px 4px;border-bottom:1px dotted #a9997b;vertical-align:top}
+  .ticket td:first-child{font-family:Oswald;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;font-size:12px;color:#6b5d47;width:38%;padding-top:10px}
+  .approved{
+    position:absolute;right:16px;top:18px;transform:rotate(-14deg);color:var(--red);border:4px double var(--red);
+    font-family:"Black Ops One";font-size:22px;padding:6px 12px;opacity:.85;letter-spacing:2px;text-align:center;line-height:1
+  }
+  .approved small{display:block;font-size:11px;letter-spacing:1px;margin-top:3px}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .btn{cursor:pointer;font-family:Oswald;font-weight:600;font-size:16px;letter-spacing:1px;text-transform:uppercase;border:2px solid var(--ink);background:#fffaf0;color:var(--ink);padding:10px 16px;border-radius:5px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--ink);color:var(--paper)}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .hint{font-family:Oswald;font-weight:400;font-size:14px;color:#6b5d47;margin-top:12px}
+  pre.copytext{white-space:pre-wrap;font-family:"Special Elite";font-size:14px;background:#f4ecd9;border:1px solid #cdbd99;padding:10px;margin:12px 0 0;display:none}
+
+  /* sparks */
+  .spark{position:fixed;width:4px;height:4px;border-radius:50%;background:var(--spark2);box-shadow:0 0 6px 2px var(--spark);pointer-events:none;z-index:50}
+
+  @media (max-width:600px){
+    .fields,.sig{grid-template-columns:1fr}
+    header{gap:10px}
+    .logo{width:160px;height:160px}
+    .title{text-align:center}
+    .approved{position:static;display:inline-block;margin-bottom:10px;transform:rotate(-4deg)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <img src="sign.webp" alt="Brad's Welding Shop sign, Est. 2022">
+      <div class="tag">&amp; KNIFE</div>
+    </div>
+    <div class="title">
+      <div class="kicker">★ CUSTOM HANDLE DEPARTMENT ★</div>
+      <h1>Happy Birthday, <span id="hdrName">David</span>!</h1>
+      <p>Your knife is on the bench and ready for new handles. You pick, Brad builds.</p>
+    </div>
+  </header>
+
+  <form class="paper" id="orderForm" novalidate>
+    <span class="rivet r1"></span><span class="rivet r2"></span><span class="rivet r3"></span><span class="rivet r4"></span>
+
+    <div class="formhead">
+      <div>
+        <h2>OFFICIAL WORK ORDER</h2>
+        <div style="font-family:'Special Elite';font-size:14px;color:#6b5d47">Form BWK-1 · Knife Handle Re-Scale · Birthday Edition</div>
+      </div>
+      <div class="meta">
+        <b>ORDER NO.</b> <span id="orderNo"></span><br>
+        <b>DATE</b> <span id="orderDate"></span><br>
+        <b>PRIORITY</b> Birthday (highest)
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section>
+      <div class="step"><div class="num">1</div><h3>Customer Info <small>Who's this knife going home to?</small></h3></div>
+      <div class="fields">
+        <div><label class="f" for="cust">Customer name</label><input type="text" id="cust" value="David" autocomplete="off"></div>
+        <div><label class="f" for="troop">Old troop no. <span style="text-transform:none;letter-spacing:0">(if you remember it)</span></label><input type="text" id="troop" placeholder="Troop ___" autocomplete="off"></div>
+      </div>
+    </section>
+
+    <!-- live preview -->
+    <div class="bench" aria-live="polite">
+      <svg id="knife" viewBox="0 0 620 150" role="img" aria-label="Preview of the knife with the chosen handle"></svg>
+      <div class="cap" id="benchCap">On the bench: <b>pick a wood below ↓</b></div>
+    </div>
+
+    <!-- 2 -->
+    <section>
+      <div class="step"><div class="num">2</div><h3>Pick Your Handle Scales <small>Tap the wood you want. Brad's honest shop notes are in red.</small></h3></div>
+      <div class="woods" id="woods"></div>
+      <div class="sub">Runner-up pick, in case the lumber pile disagrees</div>
+      <div class="chips" id="second"></div>
+    </section>
+
+    <!-- 3 -->
+    <section>
+      <div class="step"><div class="num">3</div><h3>Pins &amp; Finish <small>The little details that make it yours</small></h3></div>
+      <div class="sub">Handle pins</div>
+      <div class="chips" id="pins"></div>
+      <div class="sub">Finish</div>
+      <div class="chips" id="finish"></div>
+    </section>
+
+    <!-- 4 -->
+    <section>
+      <div class="step"><div class="num">4</div><h3>Scout's Honor Section <small>Required by absolutely no one</small></h3></div>
+      <label class="check"><input type="checkbox" id="c1"> I still have my Totin' Chip, or at least I remember the rules, and I promise to cut <em>away</em> from myself.</label>
+      <label class="check"><input type="checkbox" id="c2"> I understand this knife comes with stories, and I'll tell Brad at least one of them.</label>
+      <label class="check"><input type="checkbox" id="c3"> I won't use it to open paint cans. (Okay, maybe once.)</label>
+      <div style="margin-top:14px">
+        <label class="f" for="notes">Special instructions for the shop</label>
+        <textarea id="notes" placeholder="Memories of this knife, things to keep, things to fix, or just say hi to Brad…"></textarea>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section>
+      <div class="step"><div class="num">5</div><h3>Sign It <small>Makes it official-ish</small></h3></div>
+      <div class="sig">
+        <div><label class="f" for="sign">Customer signature</label><input type="text" id="sign" placeholder="sign here ✍" autocomplete="off"></div>
+        <div><label class="f">Shop foreman</label><div style="font-family:'Permanent Marker';font-size:24px;border-bottom:2px solid var(--ink);padding:6px 2px;color:#13294b">Brad</div></div>
+      </div>
+    </section>
+
+    <button class="submit" type="submit">🔥 SEND IT TO THE SHOP 🔥</button>
+    <div class="err" id="err" role="alert"></div>
+
+    <div class="fine">Brad's Welding &amp; Knife Shop is a test lab for C.A.S. Industries Inc. and is not responsible for bad welds, shoddy products, splinters, or handles that turn out better than expected. No refunds. Birthday wishes are free.</div>
+  </form>
+
+  <!-- ticket -->
+  <div id="ticket" class="paper" style="margin-top:0">
+    <span class="rivet r1"></span><span class="rivet r2"></span><span class="rivet r3"></span><span class="rivet r4"></span>
+    <div class="ticket">
+      <div class="approved">ORDER<br>RECEIVED<small>BRAD'S W&amp;K SHOP</small></div>
+      <h3>WORK ORDER TICKET</h3>
+      <div class="no" id="tNo"></div>
+      <table id="tTable"></table>
+      <div><b style="font-family:Oswald;letter-spacing:1px">EST. COMPLETION:</b> When Brad says so. Quality takes time, birthdays don't wait. He'll work fast.</div>
+      <div class="hint">Last step: get this ticket to Brad so he knows what to build.</div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="copyBtn">📋 Copy my order</button>
+        <a class="btn" id="smsBtn" href="#">💬 Text it to Brad</a>
+        <button class="btn" type="button" id="editBtn">✏️ Change my mind</button>
+      </div>
+      <div class="hint" id="copyMsg"></div>
+      <pre class="copytext" id="copyText"></pre>
+    </div>
+  </div>
+
+  <footer>Est. 2022 · Hand-crafted in the garage · Happy Birthday, cousin</footer>
+</div>
+
+<script>
+(function(){
+  const WOODS = [
+    {id:"koa", name:"“Big Island” Koa", origin:"Hawaii, USA",
+     desc:"Golden-to-reddish brown with a curly figure that shimmers when you tilt it. Hawaiians built canoes and ukuleles out of this stuff.",
+     looks:4, tough:3, rare:5, vibe:"Island chief",
+     note:"Tilt it in the sun and it looks like it's moving. Fancy.",
+     base:"#9b5a2b", light:"#d08a45", dark:"#4f2810", fx:0.0045, fy:0.10, figure:true, seed:7},
+    {id:"walnut", name:"Figured Walnut", origin:"North America",
+     desc:"Rich chocolate brown with swirls in the grain. The classic. Grandpa's-gun-stock energy, in the best way.",
+     looks:4, tough:3, rare:3, vibe:"Old-school classic",
+     note:"Can't go wrong. This is the 'jeans and a good jacket' of woods.",
+     base:"#5a3820", light:"#8a5a35", dark:"#24140a", fx:0.004, fy:0.12, figure:true, seed:21},
+    {id:"bolivian", name:"Bolivian Rosewood", origin:"Bolivia & Brazil (a.k.a. Pau Ferro)",
+     desc:"Deep reddish-violet brown with tight, dark pinstripes. Hard, dense and grippy. Built to work, not just look pretty.",
+     looks:3, tough:4, rare:3, vibe:"Quiet workhorse",
+     note:"If this knife is going back in the woods, this is a smart pick.",
+     base:"#6c3622", light:"#94523a", dark:"#2a120a", fx:0.003, fy:0.22, figure:false, seed:3},
+    {id:"claro", name:"Figured Claro Walnut", origin:"California, USA",
+     desc:"Lighter caramel and tan with dark marbled streaks. It's a California walnut, so it's practically a local.",
+     looks:4, tough:3, rare:4, vibe:"West Coast chill",
+     note:"Lightest of the bunch. Every set looks totally different.",
+     base:"#a8825a", light:"#cfae84", dark:"#4a3220", fx:0.005, fy:0.08, figure:true, seed:42},
+    {id:"cocobolo", name:"Cocobolo", origin:"Central America",
+     desc:"Fiery orange-red with black streaks, and it darkens to a deep rich red over the years. Naturally oily and basically weatherproof.",
+     looks:5, tough:5, rare:4, vibe:"Show-off (affectionate)",
+     note:"Toughest one here. Brad has to wear a mask to cut it. Worth it.",
+     base:"#9a4220", light:"#d0682e", dark:"#1e0c06", fx:0.0035, fy:0.16, figure:false, seed:11},
+  ];
+  const PINS = [
+    {id:"brass", name:"Brass", c:"#d4a73a", c2:"#8a6a1a"},
+    {id:"nickel", name:"Nickel silver", c:"#d8dcdf", c2:"#7c8186"},
+    {id:"copper", name:"Copper", c:"#d07a46", c2:"#7a3d1e"},
+    {id:"brad", name:"Brad's choice", c:"#ff7a1a", c2:"#1d1c1b"},
+  ];
+  const FINISH = [
+    {id:"satin", name:"Satin oil · natural feel, best grip"},
+    {id:"gloss", name:"High gloss · shows off the grain"},
+    {id:"rugged", name:"Leave it rugged"},
+  ];
+
+  const st = {wood:null, second:null, pin:"brass", finish:"satin"};
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  // ---------- order no / date ----------
+  const now = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const orderNo = `BWK-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-DAV`;
+  $("#orderNo").textContent = orderNo;
+  $("#orderDate").textContent = now.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+
+  // ---------- wood texture ----------
+  function woodDefs(w, uid){
+    const fig = w.figure ? `
+      <feTurbulence type="turbulence" baseFrequency="0.018 0.035" numOctaves="2" seed="${w.seed+5}" result="warp"/>
+      <feDisplacementMap in="n" in2="warp" scale="28" xChannelSelector="R" yChannelSelector="G" result="n"/>` : "";
+    const d = hexRGB(w.dark), l = hexRGB(w.light);
+    return `
+      <filter id="g${uid}" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="${w.fx} ${w.fy}" numOctaves="4" seed="${w.seed}" result="n"/>
+        ${fig}
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 ${d[0]}  0 0 0 0 ${d[1]}  0 0 0 0 ${d[2]}  -3.2 0 0 0 1.75"/>
+      </filter>
+      <filter id="h${uid}" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="${w.fx*1.6} ${w.fy*0.7}" numOctaves="3" seed="${w.seed+2}" result="n"/>
+        ${w.figure ? `<feTurbulence type="turbulence" baseFrequency="0.02 0.04" numOctaves="2" seed="${w.seed+9}" result="warp"/><feDisplacementMap in="n" in2="warp" scale="22" xChannelSelector="R" yChannelSelector="G" result="n"/>` : ""}
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 ${l[0]}  0 0 0 0 ${l[1]}  0 0 0 0 ${l[2]}  3 0 0 0 -1.35"/>
+      </filter>
+      <linearGradient id="v${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000" stop-opacity=".28"/>
+      </linearGradient>
+      <linearGradient id="s${uid}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>`;
+  }
+  function woodLayers(w, uid, x, y, W, H){
+    return `<rect x="${x}" y="${y}" width="${W}" height="${H}" fill="${w.base}"/>
+      <rect x="${x}" y="${y}" width="${W}" height="${H}" filter="url(#h${uid})"/>
+      <rect x="${x}" y="${y}" width="${W}" height="${H}" filter="url(#g${uid})"/>
+      <rect x="${x}" y="${y}" width="${W}" height="${H}" fill="url(#v${uid})"/>`;
+  }
+  function hexRGB(h){ const n=parseInt(h.slice(1),16); return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255].map(v=>v.toFixed(3)); }
+
+  function pinObj(){ return PINS.find(p=>p.id===st.pin); }
+  function pinSVG(cx,cy,r,uid){
+    const p = pinObj();
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#pin${uid})" stroke="rgba(0,0,0,.45)" stroke-width="1"/>`;
+  }
+  function pinGrad(uid){
+    const p = pinObj();
+    return `<radialGradient id="pin${uid}" cx=".35" cy=".35" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="${p.c}"/><stop offset="1" stop-color="${p.c2}"/></radialGradient>`;
+  }
+
+  // ---------- render wood cards ----------
+  function meter(label, n){
+    return `<div class="meter"><span style="width:62px">${label}</span><span class="bar">${[1,2,3,4,5].map(i=>`<i class="${i<=n?"on":""}"></i>`).join("")}</span></div>`;
+  }
+  function swatchSVG(w){
+    const uid = "sw"+w.id;
+    return `<svg class="swatch" viewBox="0 0 300 92" aria-hidden="true">
+      <defs>${woodDefs(w,uid)}${pinGrad(uid)}
+        <clipPath id="c${uid}"><rect x="2" y="2" width="296" height="40" rx="10"/><rect x="2" y="50" width="296" height="40" rx="10"/></clipPath>
+      </defs>
+      <g clip-path="url(#c${uid})">
+        ${woodLayers(w,uid,0,0,300,92)}
+        <rect class="shine" x="-120" y="0" width="90" height="92" fill="url(#s${uid})" transform="skewX(-20)"/>
+      </g>
+      <g class="pins">${[60,150,240].map(x=>pinSVG(x,22,5,uid)+pinSVG(x,70,5,uid)).join("")}</g>
+    </svg>`;
+  }
+  function renderWoods(){
+    $("#woods").innerHTML = WOODS.map(w=>`
+      <label class="wood ${st.wood===w.id?"sel":""}" data-id="${w.id}">
+        <input type="radio" name="wood" value="${w.id}" ${st.wood===w.id?"checked":""}>
+        <span class="stamp">ON THE BENCH</span>
+        ${swatchSVG(w)}
+        <h4>${w.name}</h4>
+        <div class="origin">${w.origin} · Vibe: ${w.vibe}</div>
+        <p>${w.desc}</p>
+        ${meter("Looks",w.looks)}${meter("Tough",w.tough)}${meter("Rarity",w.rare)}
+        <div class="note">Brad: "${w.note}"</div>
+      </label>`).join("");
+    document.querySelectorAll('#woods input').forEach(inp=>{
+      inp.addEventListener("change", e=>{
+        st.wood = inp.value;
+        if (st.second===st.wood) st.second=null;
+        document.querySelectorAll(".wood").forEach(c=>c.classList.toggle("sel", c.dataset.id===st.wood));
+        renderSecond(); renderKnife();
+        const r = inp.closest(".wood").getBoundingClientRect();
+        sparks(r.left + r.width*0.82, r.top + 30);
+        $("#err").textContent="";
+      });
+    });
+  }
+  function refreshPins(){ // update pin gradients in all swatches without re-rendering cards
+    const p = pinObj();
+    document.querySelectorAll('radialGradient[id^="pin"]').forEach(g=>{
+      const s = g.querySelectorAll("stop"); s[1].setAttribute("stop-color",p.c); s[2].setAttribute("stop-color",p.c2);
+    });
+  }
+
+  function chips(el, list, key, name){
+    el.innerHTML = list.map(o=>`
+      <label class="chip"><input type="radio" name="${name}" value="${o.id}" ${st[key]===o.id?"checked":""} ${o.disabled?"disabled":""}>
+      <span>${o.c?`<i class="dot" style="background:radial-gradient(circle at 35% 35%,#fff,${o.c} 45%,${o.c2})"></i>`:""}${esc(o.name)}</span></label>`).join("");
+    el.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
+      st[key]=i.value;
+      if(key==="pin"){ refreshPins(); renderKnife(); }
+      if(key==="finish"){ renderKnife(); }
+    }));
+  }
+  function renderSecond(){
+    const list = [{id:"none",name:"No backup, I'm sure"}].concat(WOODS.map(w=>({id:w.id,name:w.name.replace(/[“”]/g,""),disabled:w.id===st.wood})));
+    if(!st.second) st.second="none";
+    chips($("#second"), list, "second", "second");
+  }
+
+  // ---------- knife preview ----------
+  function renderKnife(){
+    const w = WOODS.find(x=>x.id===st.wood);
+    const uid = "kn";
+    const handle = "M338,46 L548,48 Q596,52 598,76 Q596,100 548,104 L338,106 Z";
+    const gloss = st.finish==="gloss" ? `<path d="M345,52 L548,54 Q580,57 588,68 Q560,60 345,62 Z" fill="#fff" opacity=".35"/>` : "";
+    const rugged = st.finish==="rugged" ? .15 : 0;
+    const woodFill = w
+      ? `<g clip-path="url(#hc)">${woodLayers(w,uid,330,40,280,72)}${gloss}</g>`
+      : `<path d="${handle}" fill="#6f6a63"/><text x="468" y="82" text-anchor="middle" font-family="Special Elite" font-size="15" fill="#e9dcc0">bare tang · needs wood!</text>`;
+    $("#knife").innerHTML = `
+      <defs>
+        ${w?woodDefs(w,uid):""}${pinGrad(uid)}
+        <clipPath id="hc"><path d="${handle}"/></clipPath>
+        <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#eef1f3"/><stop offset=".45" stop-color="#b7bcc0"/><stop offset=".55" stop-color="#8d9398"/><stop offset="1" stop-color="#d9dde0"/>
+        </linearGradient>
+        <linearGradient id="bev" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".55"/></linearGradient>
+        <linearGradient id="guard" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c8186"/><stop offset=".5" stop-color="#e2e5e8"/><stop offset="1" stop-color="#6d7277"/></linearGradient>
+        <filter id="sh"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".55"/></filter>
+      </defs>
+      <g filter="url(#sh)">
+        <path d="M330,48 L120,48 Q60,50 22,86 Q90,108 220,106 L330,104 Z" fill="url(#blade)"/>
+        <path d="M22,86 Q90,108 220,106 L330,104 L330,92 L220,92 Q110,94 22,86 Z" fill="url(#bev)"/>
+        <path d="M330,48 L120,48 Q60,50 22,86" fill="none" stroke="#6d7277" stroke-width="1.5"/>
+        <path d="M150,58 L300,58" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+        ${woodFill}
+        <path d="${handle}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="1.5"/>
+        <rect x="322" y="36" width="16" height="80" rx="4" fill="url(#guard)" stroke="#4d5155"/>
+        ${w?pinSVG(392,76,6,uid)+pinSVG(470,76,6,uid)+pinSVG(544,76,6,uid):""}
+        <circle cx="582" cy="76" r="5" fill="#2b1e14" stroke="rgba(0,0,0,.6)"/>
+      </g>
+      ${rugged?`<g opacity=".5" stroke="#000" stroke-width="1">${Array.from({length:14},(_,i)=>`<path d="M${350+i*16},${56+(i%3)*14} l${6},${4}"/>`).join("")}</g>`:""}`;
+    const p = pinObj(), f = FINISH.find(x=>x.id===st.finish);
+    $("#benchCap").innerHTML = w
+      ? `On the bench: <b>${esc(w.name)}</b> · ${esc(p.name)} pins · ${esc(f.name.split(" · ")[0])}`
+      : `On the bench: <b>pick a wood below ↓</b>`;
+  }
+
+  // ---------- sparks ----------
+  function sparks(x,y){
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for(let i=0;i<16;i++){
+      const s=document.createElement("span"); s.className="spark"; document.body.appendChild(s);
+      const a=Math.random()*Math.PI*2, d=40+Math.random()*70;
+      s.style.left=x+"px"; s.style.top=y+"px";
+      s.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+30}px)`,opacity:0}],
+        {duration:500+Math.random()*400,easing:"cubic-bezier(.2,.8,.4,1)"}).onfinish=()=>s.remove();
+    }
+  }
+
+  // ---------- name sync ----------
+  $("#cust").addEventListener("input",e=>{ $("#hdrName").textContent = e.target.value.trim() || "David"; });
+
+  // ---------- submit ----------
+  let orderText = "";
+  $("#orderForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    if(!st.wood){ $("#err").textContent = "Hold up! Brad can't build a handle out of thin air. Pick a wood in Step 2."; document.getElementById("woods").scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    if(!$("#sign").value.trim()){ $("#err").textContent = "Gotta sign it! Brad doesn't touch the grinder without a signature."; $("#sign").focus(); return; }
+    $("#err").textContent="";
+    const w = WOODS.find(x=>x.id===st.wood), s2 = WOODS.find(x=>x.id===st.second);
+    const p = pinObj(), f = FINISH.find(x=>x.id===st.finish);
+    const oaths = ["#c1","#c2","#c3"].filter(id=>$(id).checked).length;
+    const rows = [
+      ["Customer", $("#cust").value.trim() || "David"],
+      ["Old troop", $("#troop").value.trim() || "Classified"],
+      ["Handle scales", w.name.replace(/[“”]/g,"")],
+      ["Backup pick", s2 ? s2.name.replace(/[“”]/g,"") : "None, they're sure"],
+      ["Pins", p.name],
+      ["Finish", f.name],
+      ["Scout's honor", `${oaths} of 3 sworn`],
+      ["Special instructions", $("#notes").value.trim() || "None"],
+      ["Signed", $("#sign").value.trim()],
+    ];
+    $("#tNo").textContent = `No. ${orderNo} · ${$("#orderDate").textContent}`;
+    $("#tTable").innerHTML = rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("");
+    orderText = `🔧 BRAD'S WELDING & KNIFE SHOP · WORK ORDER ${orderNo}\n` + rows.map(r=>`${r[0]}: ${r[1]}`).join("\n");
+    $("#smsBtn").href = "sms:?&body=" + encodeURIComponent(orderText);
+    $("#copyText").textContent = orderText;
+    $("#copyMsg").textContent = "";
+    $("#orderForm").style.display="none";
+    const t=$("#ticket"); t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+    t.scrollIntoView({behavior:"smooth",block:"start"});
+    const r=t.getBoundingClientRect(); setTimeout(()=>{ sparks(innerWidth-120, 140); sparks(innerWidth/2, 160); },350);
+  });
+
+  $("#copyBtn").addEventListener("click", async ()=>{
+    try{ await navigator.clipboard.writeText(orderText); $("#copyMsg").textContent="✅ Copied! Paste it in a text to Brad."; }
+    catch(err){ $("#copyMsg").textContent="Your browser wouldn't let me copy it. Here's the text, so you can select it yourself:"; $("#copyText").style.display="block"; }
+  });
+  $("#smsBtn").addEventListener("click", ()=>{
+    $("#copyMsg").textContent = "If your messages app didn't open, copy the order below and text it to Brad yourself.";
+    $("#copyText").style.display="block";
+  });
+  $("#editBtn").addEventListener("click", ()=>{
+    $("#ticket").classList.remove("show"); $("#orderForm").style.display="";
+    $("#orderForm").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  // ---------- init ----------
+  renderWoods(); renderSecond();
+  chips($("#pins"), PINS, "pin", "pin");
+  chips($("#finish"), FINISH, "finish", "finish");
+  renderKnife();
+})();
+</script>
+</body>
+</html>
